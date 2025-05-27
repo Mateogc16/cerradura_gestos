@@ -66,7 +66,7 @@ data = np.ndarray(shape=(1, 224, 224, 3), dtype=np.float32)
 st.title("🛡️ Portal Encantado de la Fortaleza")
 
 # ---- IMAGEN DEL DRAGÓN DESDE GITHUB ----
-st.image("https://raw.githubusercontent.com/TU_USUARIO/TU_REPO/main/dragon.jpg", 
+st.image("https://raw.githubusercontent.com/mateogc16/cerradura_gestos/main/dragon.jpg", 
          caption="🐉 Guardián del Portal", use_column_width=True)
 
 st.markdown("### ✨ *Invoca con tu gesto o palabra el poder de abrir o sellar la puerta mágica...*")
