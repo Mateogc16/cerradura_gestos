@@ -1,8 +1,73 @@
-st.title("🛡️ Portal Encantado de la Fortaleza")
+import paho.mqtt.client as paho
+import time
+import streamlit as st
+import cv2
+import numpy as np
+from PIL import Image as Image, ImageOps as ImagOps
+from keras.models import load_model
 
+# ---- CONFIGURACIÓN DE PÁGINA ----
+st.set_page_config(page_title="🔐 Portal de la Fortaleza", page_icon="🛡️", layout="centered")
+
+# ---- ESTILO MEDIEVAL ----
+st.markdown("""
+    <style>
+    body {
+        background-color: #fdf6e3;
+        color: #3e2f1c;
+    }
+    .stApp {
+        background-image: url('https://i.imgur.com/1ZQZ1Zv.png');
+        background-size: cover;
+        background-repeat: no-repeat;
+        background-attachment: fixed;
+    }
+    h1, h2, h3 {
+        color: #5e3929;
+        font-family: 'Georgia', serif;
+        text-shadow: 1px 1px #decbb7;
+    }
+    .stButton>button {
+        background-color: #5e3929 !important;
+        color: #f3e9dc !important;
+        border-radius: 10px;
+        border: 2px solid #e0c097;
+        font-weight: bold;
+    }
+    .stTextInput>div>div>input {
+        background-color: #fffbe6;
+        color: #3e2f1c;
+        border: 1px solid #bfa27f;
+    }
+    </style>
+""", unsafe_allow_html=True)
+
+# ---- MQTT ----
+def on_publish(client, userdata, result):
+    print("El dato ha sido publicado\n")
+    pass
+
+def on_message(client, userdata, message):
+    global message_received
+    message_received = str(message.payload.decode("utf-8"))
+    st.write("📜 Mensaje recibido:", message_received)
+
+broker = "broker.hivemq.com"
+port = 1883
+client1 = paho.Client("APP_yyyyy")
+client1.on_message = on_message
+client1.on_publish = on_publish
+client1.connect(broker, port)
+
+# ---- MODELO ----
+model = load_model('keras_model.h5')
+data = np.ndarray(shape=(1, 224, 224, 3), dtype=np.float32)
+
+# ---- INTERFAZ ----
+st.title("🛡️ Portal Encantado de la Fortaleza")
 st.markdown("### ✨ *Invoca con tu gesto o palabra el poder de abrir o sellar la puerta mágica...*")
 
-# --- Herramienta 1: Entrada por cámara (reconocimiento de gestos)
+# ---- HERRAMIENTA 1: RECONOCIMIENTO DE GESTOS ----
 st.subheader("📜 Magia Visual - Sello por Gesto")
 img_file_buffer = st.camera_input("📸 Muestra tu gesto sagrado frente al espejo encantado")
 
@@ -22,7 +87,7 @@ if img_file_buffer is not None:
         st.warning("🔒 ¡El portón se cierra con el poder de tu sello ancestral!")
         client1.publish("PIPPO", "{'gesto': 'Cierra'}", qos=0, retain=False)
 
-# --- Herramienta 2: Entrada por texto
+# ---- HERRAMIENTA 2: COMANDO ESCRITO ----
 st.subheader("📖 Hechizo Escrito - Sello por Palabra")
 user_command = st.text_input("✍️ Escribe 'abrir' o 'cerrar' como si fueran conjuros").strip().lower()
 
