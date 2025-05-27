@@ -1,9 +1,8 @@
 import paho.mqtt.client as paho
 import time
 import streamlit as st
-import cv2
 import numpy as np
-from PIL import Image as Image, ImageOps as ImagOps
+from PIL import Image
 from keras.models import load_model
 
 # ---- CONFIGURACIÓN DE PÁGINA ----
@@ -59,15 +58,20 @@ client1.on_message = on_message
 client1.on_publish = on_publish
 client1.connect(broker, port)
 
-# ---- MODELO ----
+# ---- CARGA DEL MODELO ----
 model = load_model('keras_model.h5')
 data = np.ndarray(shape=(1, 224, 224, 3), dtype=np.float32)
 
 # ---- INTERFAZ ----
 st.title("🛡️ Portal Encantado de la Fortaleza")
+
+# ---- IMAGEN DEL DRAGÓN DESDE GITHUB ----
+st.image("https://raw.githubusercontent.com/TU_USUARIO/TU_REPO/main/dragon.jpg", 
+         caption="🐉 Guardián del Portal", use_column_width=True)
+
 st.markdown("### ✨ *Invoca con tu gesto o palabra el poder de abrir o sellar la puerta mágica...*")
 
-# ---- HERRAMIENTA 1: RECONOCIMIENTO DE GESTOS ----
+# ---- HERRAMIENTA 1: GESTO CON CÁMARA ----
 st.subheader("📜 Magia Visual - Sello por Gesto")
 img_file_buffer = st.camera_input("📸 Muestra tu gesto sagrado frente al espejo encantado")
 
