@@ -70,29 +70,37 @@ client1.connect(broker, port)
 model = load_model('keras_model.h5')
 data = np.ndarray(shape=(1, 224, 224, 3), dtype=np.float32)
 
-# ---- INTERFAZ ----
-st.title("🛡️ Portal Encantado de la Fortaleza")
-st.markdown("### ✨ *Invoca con tu gesto o palabra el poder de abrir o sellar la puerta mágica...*")
+st.title("Cerradura Inteligente")
 
-# ---- HERRAMIENTA 1: RECONOCIMIENTO DE GESTOS ----
-st.subheader("📜 Magia Visual - Sello por Gesto")
-img_file_buffer = st.camera_input("📸 Muestra tu gesto sagrado frente al espejo encantado")
+img_file_buffer = st.camera_input("Toma una Foto")
 
 if img_file_buffer is not None:
+    # To read image file buffer with OpenCV:
     data = np.ndarray(shape=(1, 224, 224, 3), dtype=np.float32)
+   #To read image file buffer as a PIL Image:
     img = Image.open(img_file_buffer)
-    img = img.resize((224, 224))
-    img_array = np.array(img)
-    normalized_image_array = (img_array.astype(np.float32) / 127.0) - 1
-    data[0] = normalized_image_array
-    prediction = model.predict(data)
 
-    if prediction[0][0] > 0.4:
-        st.success("🔓 ¡La puerta de roble se abre con tu gesto mágico!")
-        client1.publish("PIPPO", "{'gesto': 'Abre'}", qos=0, retain=False)
-    if prediction[0][1] > 0.4:
-        st.warning("🔒 ¡El portón se cierra con el poder de tu sello ancestral!")
-        client1.publish("PIPPO", "{'gesto': 'Cierra'}", qos=0, retain=False)
+    newsize = (224, 224)
+    img = img.resize(newsize)
+    # To convert PIL Image to numpy array:
+    img_array = np.array(img)
+
+    # Normalize the image
+    normalized_image_array = (img_array.astype(np.float32) / 127.0) - 1
+    # Load the image into the array
+    data[0] = normalized_image_array
+
+    # run the inference
+    prediction = model.predict(data)
+    print(prediction)
+    if prediction[0][0]>0.3:
+      st.header('Abriendo')
+      client1.publish("IMIA","{'gesto': 'Abre'}",qos=0, retain=False)
+      time.sleep(0.2)
+    if prediction[0][1]>0.3:
+      st.header('Cerrando')
+      client1.publish("IMIA","{'gesto': 'Cierra'}",qos=0, retain=False)
+      time.sleep(0.2)  
 
 # ---- HERRAMIENTA 2: COMANDO ESCRITO ----
 st.subheader("📖 Hechizo Escrito - Sello por Palabra")
