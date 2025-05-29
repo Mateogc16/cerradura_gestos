@@ -1,51 +1,43 @@
 import paho.mqtt.client as paho
 import time
 import streamlit as st
-import cv2
 import numpy as np
-from PIL import Image as Image, ImageOps as ImagOps
+from PIL import Image
 from keras.models import load_model
 
 # ---- CONFIGURACIÓN DE PÁGINA ----
 st.set_page_config(page_title="🔐 Portal de la Fortaleza", page_icon="🛡️", layout="centered")
 
-# ---- ESTILO VISUAL MEDIEVAL CON IMAGEN DE FONDO DESDE GITHUB ----
-st.markdown(f"""
+# ---- ESTILO MEDIEVAL ----
+st.markdown("""
     <style>
-    body {{
-        background-color: #000000;
-        color: #f3e9dc;
-    }}
-    .stApp {{
-        background-image: url('https://raw.githubusercontent.com/Mateogc16/cerradura_gestos/main/dragon.jpg');
+    body {
+        background-color: #fdf6e3;
+        color: #3e2f1c;
+    }
+    .stApp {
+        background-image: url('https://i.imgur.com/1ZQZ1Zv.png');
         background-size: cover;
         background-repeat: no-repeat;
         background-attachment: fixed;
-        background-position: center;
-    }}
-    h1, h2, h3 {{
-        color: #f8e8c1;
+    }
+    h1, h2, h3 {
+        color: #5e3929;
         font-family: 'Georgia', serif;
-        text-shadow: 2px 2px 4px #000000;
-    }}
-    .stButton>button {{
+        text-shadow: 1px 1px #decbb7;
+    }
+    .stButton>button {
         background-color: #5e3929 !important;
         color: #f3e9dc !important;
         border-radius: 10px;
         border: 2px solid #e0c097;
         font-weight: bold;
-    }}
-    .stTextInput>div>div>input {{
+    }
+    .stTextInput>div>div>input {
         background-color: #fffbe6;
         color: #3e2f1c;
         border: 1px solid #bfa27f;
-    }}
-    .block-container {{
-        padding-top: 2rem;
-        background-color: rgba(0, 0, 0, 0.6);
-        border-radius: 15px;
-        padding: 2rem;
-    }}
+    }
     </style>
 """, unsafe_allow_html=True)
 
@@ -66,41 +58,38 @@ client1.on_message = on_message
 client1.on_publish = on_publish
 client1.connect(broker, port)
 
-# ---- MODELO ----
+# ---- CARGA DEL MODELO ----
 model = load_model('keras_model.h5')
 data = np.ndarray(shape=(1, 224, 224, 3), dtype=np.float32)
 
-st.title("Cerradura Inteligente")
+# ---- INTERFAZ ----
+st.title("🛡️ Portal Encantado de la Fortaleza")
 
-img_file_buffer = st.camera_input("Toma una Foto")
+# ---- IMAGEN DEL DRAGÓN DESDE GITHUB ----
+st.image("https://raw.githubusercontent.com/TU_USUARIO/TU_REPO/main/dragon.jpeg", 
+         caption="🐉 Guardián del Portal", use_column_width=True)
+
+st.markdown("### ✨ *Invoca con tu gesto o palabra el poder de abrir o sellar la puerta mágica...*")
+
+# ---- HERRAMIENTA 1: GESTO CON CÁMARA ----
+st.subheader("📜 Magia Visual - Sello por Gesto")
+img_file_buffer = st.camera_input("📸 Muestra tu gesto sagrado frente al espejo encantado")
 
 if img_file_buffer is not None:
-    # To read image file buffer with OpenCV:
     data = np.ndarray(shape=(1, 224, 224, 3), dtype=np.float32)
-   #To read image file buffer as a PIL Image:
     img = Image.open(img_file_buffer)
-
-    newsize = (224, 224)
-    img = img.resize(newsize)
-    # To convert PIL Image to numpy array:
+    img = img.resize((224, 224))
     img_array = np.array(img)
-
-    # Normalize the image
     normalized_image_array = (img_array.astype(np.float32) / 127.0) - 1
-    # Load the image into the array
     data[0] = normalized_image_array
-
-    # run the inference
     prediction = model.predict(data)
-    print(prediction)
-    if prediction[0][0]>0.3:
-      st.header('Abriendo')
-      client1.publish("IMIA","{'gesto': 'Abre'}",qos=0, retain=False)
-      time.sleep(0.2)
-    if prediction[0][1]>0.3:
-      st.header('Cerrando')
-      client1.publish("IMIA","{'gesto': 'Cierra'}",qos=0, retain=False)
-      time.sleep(0.2)  
+
+    if prediction[0][0] > 0.3:
+        st.success("🔓 ¡La puerta de roble se abre con tu gesto mágico!")
+        client1.publish("PIPPO", "{'gesto': 'Abre'}", qos=0, retain=False)
+    elif prediction[0][1] > 0.3:
+        st.warning("🔒 ¡El portón se cierra con el poder de tu sello ancestral!")
+        client1.publish("PIPPO", "{'gesto': 'Cierra'}", qos=0, retain=False)
 
 # ---- HERRAMIENTA 2: COMANDO ESCRITO ----
 st.subheader("📖 Hechizo Escrito - Sello por Palabra")
