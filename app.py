@@ -90,7 +90,7 @@ if img_file_buffer is not None:
     if prediction[0][0] > 0.4:
         st.success("🔓 ¡La puerta de roble se abre con tu gesto mágico!")
         client1.publish("PIPPO", "{'gesto': 'Abre'}", qos=0, retain=False)
-    elif prediction[0][1] > 0.4:
+    if prediction[0][1] > 0.4:
         st.warning("🔒 ¡El portón se cierra con el poder de tu sello ancestral!")
         client1.publish("PIPPO", "{'gesto': 'Cierra'}", qos=0, retain=False)
 
